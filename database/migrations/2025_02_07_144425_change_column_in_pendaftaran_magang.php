@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('pendaftaran_magang', function (Blueprint $table) {
+            $table->renameColumn('dokumen_spm', 'dokumen_skm');
+        });
+        Schema::table('pendaftaran_magang', function (Blueprint $table) {
+            $table->string('dokumen_spm')->nullable();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('pendaftaran_magang', function (Blueprint $table) {
+            $table->dropColumn('dokumen_spm');
+        });
+        Schema::table('pendaftaran_magang', function (Blueprint $table) {
+            $table->renameColumn('dokumen_skm', 'dokumen_spm');
+        });
+    }
+};
