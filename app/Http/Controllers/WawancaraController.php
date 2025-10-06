@@ -15,8 +15,9 @@ class WawancaraController extends Controller
         ->where('nim', $nim)
         ->first();
 
-        if(!$pendaftar_exist){
-            $softskill_lowongan = PendaftaranMagang::join('lowongan_magang', 'lowongan_magang.id_lowongan', '=', 'pendaftaran_magang.id_lowongan')
+        if($pendaftar_exist) $pendaftar_exist = Hasil_Wawancara::where('id_pendaftaran',$id_pendaftaran)->where('nim', $nim)->delete();
+
+        $softskill_lowongan = PendaftaranMagang::join('lowongan_magang', 'lowongan_magang.id_lowongan', '=', 'pendaftaran_magang.id_lowongan')
             ->where('pendaftaran_magang.id_pendaftaran', $id_pendaftaran)
             ->first();
             $arraySoftskills = array_merge(json_decode($softskill_lowongan->softskill), ["Keterangan Lain"]);
@@ -34,7 +35,12 @@ class WawancaraController extends Controller
                 })),
                 'kuota_wawancara' => 1,
             ]);
-        } else if ($pendaftar_exist->kuota_wawancara <= 0) {
+
+            $pendaftar_exist = Hasil_Wawancara::where('id_pendaftaran',$id_pendaftaran)
+            ->where('nim', $nim)
+            ->first();
+
+        if ($pendaftar_exist->kuota_wawancara <= 0) {
             return redirect()->route('lamaran_saya.detail', ['id' => $id_pendaftaran]);
         }
             return null;
