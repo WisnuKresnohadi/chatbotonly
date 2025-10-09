@@ -40,7 +40,7 @@ class TrialchatController extends Controller
         $nim = auth()->user()->mahasiswa->nim;
         $inputSet = $this->getInputSet($id_pendaftaran);
 
-        app(WawancaraController::class)->start($id_pendaftaran);
+        app(WawancaraController::class)->start($id_pendaftaran, true);
 
         // Inisialisasi cache baru dengan pertanyaan pertama
         $firstQuestion = $inputSet[0]['pertanyaanList'][0]['pertanyaan'];

@@ -145,10 +145,10 @@
 {{-- JavaScript --}}
 <script>
     document.body.style.overflow = "hidden";
-    let status = "{{ $status }}";
+let status = "{{ $status }}";
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize timer and elements
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize timer and elements
     const idPendaftaran = @json($id_pendaftaran);
     const display = document.getElementById("timer");
     const backButton = document.getElementById('BackBtn');
@@ -158,6 +158,8 @@
     const bubbleChat = document.querySelector('.bubblechat');
     const scrollContainer = document.querySelector('.scrollbarhide');
     let immportantFault = false;
+    let isWaitingForBot = false; // <-- flag tambahan untuk mencegah pengiriman ganda
+
     // Start timer
     startTimer(60 * 60, display, idPendaftaran);
 
@@ -174,36 +176,36 @@
         sendButton.style.cursor = 'not-allowed';
     }
 
-// Enable pressing Enter to send
-messageInput.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        if (!sendButton.disabled) {
-            chatForm.dispatchEvent(new Event("submit"));
-            // Scroll bubble chat ke paling bawah saat warning dibuka
-            const bubbleChatContainer = document.querySelector(".scrollbarhide");
-            if (bubbleChatContainer) {
-                bubbleChatContainer.scrollTop = bubbleChatContainer.scrollHeight;
+    // Enable pressing Enter to send
+    messageInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (!sendButton.disabled) {
+                chatForm.dispatchEvent(new Event("submit"));
+                const bubbleChatContainer = document.querySelector(".scrollbarhide");
+                if (bubbleChatContainer) {
+                    bubbleChatContainer.scrollTop = bubbleChatContainer.scrollHeight;
+                }
             }
         }
-    }
-});
+    });
+
     // user switches tab or minimizes
     document.addEventListener("visibilitychange", () => {
         if (document.hidden && status === 'unfinished' && !immportantFault) {
             immportantFault = true;
             sweetAlertConfirm({
-            title: 'Pelanggaran Sesi Wawancara!',
-            text: 'Kamu Melakukan Minimize atau Switch Tab\nSilahkan Klik Oke Untuk Memulai Ulang Wawancara',
-            icon: 'warning',
-            confirmButtonText: 'Oke',
-            showCancelButton: false,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            customClassCancel: ''
-        }, function () {
-             window.location.reload();
-        });
+                title: 'Pelanggaran Sesi Wawancara!',
+                text: 'Kamu Melakukan Minimize atau Switch Tab\nSilahkan Klik Oke Untuk Memulai Ulang Wawancara',
+                icon: 'warning',
+                confirmButtonText: 'Oke',
+                showCancelButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                customClassCancel: ''
+            }, function () {
+                window.location.reload();
+            });
         }
     });
 
@@ -222,8 +224,6 @@ messageInput.addEventListener("keydown", function(e) {
             }
         });
     });
-
-
 
     // Block PrintScreen
     document.addEventListener("keyup", function(e) {
@@ -251,29 +251,44 @@ messageInput.addEventListener("keydown", function(e) {
         }
     });
 
-    // Form submission handler
+    // 🧩 Form submission handler (sudah diperbarui)
     chatForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const message = messageInput.value.trim();
 
         if (!message) {
-           showSweetAlert({
-            title: 'Warning',
-            text: `Pesan Tidak Boleh Kosong!`,
-            icon: 'warning',
-            confirmButtonText: 'OK',
-        });
+            showSweetAlert({
+                title: 'Warning',
+                text: `Pesan Tidak Boleh Kosong!`,
+                icon: 'warning',
+                confirmButtonText: 'OK',
+            });
             return;
         }
 
+        // 🚫 Jika masih menunggu balasan bot, jangan kirim pesan baru
+        if (isWaitingForBot) {
+            return;
+        }
 
-        // Add user message to chat
+        // Set bahwa kita sedang menunggu balasan bot
+        isWaitingForBot = true;
+        sendButton.disabled = true;
+        sendButton.style.opacity = '0.5';
+        sendButton.style.cursor = 'not-allowed';
+
+        // Tambahkan pesan user ke chat
         appendMessage(message, 'user');
         messageInput.value = '';
 
-
-        // Panggil fungsi sendMessage
+        // Kirim pesan ke server
         await sendMessage(message, idPendaftaran);
+
+        // Bot sudah membalas, izinkan kirim lagi (jika belum finished)
+        isWaitingForBot = false;
+        if (status !== 'finished') {
+            checkWordCount();
+        }
     });
 
     // Fungsi untuk mengirim pesan
@@ -331,13 +346,14 @@ messageInput.addEventListener("keydown", function(e) {
             scrollContainer.scrollTop = scrollContainer.scrollHeight;
         } catch (error) {
             showSweetAlert({
-                    title: 'Koneksi Hilang',
-                    text: `Pastikan Internet Anda Lancar!`,
-                    icon: 'question',
-                    confirmButtonText: 'OK',
-                });
+                title: 'Koneksi Hilang',
+                text: `Pastikan Internet Anda Lancar!`,
+                icon: 'question',
+                confirmButtonText: 'OK',
+            });
         }
     }
+
     // Fungsi untuk memeriksa jumlah kata
     function checkWordCount() {
         const message = messageInput.value.trim();
@@ -354,10 +370,10 @@ messageInput.addEventListener("keydown", function(e) {
         }
     }
 
-    // Tambahkan event listener untuk memeriksa jumlah kata setiap kali input berubah
+    // Periksa jumlah kata setiap kali input berubah
     messageInput.addEventListener('input', checkWordCount);
 
-    // Panggil fungsi checkWordCount saat halaman dimuat untuk memastikan tombol "Send" sesuai dengan kondisi awal
+    // Pastikan tombol "Send" sesuai kondisi awal
     checkWordCount();
 });
 
@@ -380,7 +396,6 @@ function startTimer(duration, display, idPendaftaran) {
         const seconds = timer % 60;
 
         display.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
 
         if (timer < 20 && timer > 0) {
             bukaTimeLimitCard();

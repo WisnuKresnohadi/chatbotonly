@@ -332,6 +332,10 @@ Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.se
 // Route::get('/chat/testing', [ChatController::class, 'testPostMan']); //testing
 
 Route::prefix('wawancara')->name('wawancara-flow')->group(function () {
+    //congfig chatbot
+    Route::get('/config/{id_lowongan}', [WawancaraController::class, 'config'])->name('.config');
+    Route::post('/editconfig/{id_lowongan}', [WawancaraController::class, 'editconfig'])->name('.editconfig');
+
     Route::match(['get', 'post'], '/panduan/{id_pendaftaran}', [ChatController::class, 'index'])->name('.panduan');
     Route::get('/trial/{id_pendaftaran}', [TrialchatController::class, 'trialChat'])->name('.trial');
     Route::get('/hasilwawancara/{id_pendaftaran}', [HasilWawancaraController::class, 'viewHasilWawancara'])->name('.result');

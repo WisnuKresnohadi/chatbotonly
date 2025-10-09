@@ -13,7 +13,7 @@ class HasilWawancaraController extends Controller
     {
         $hasilKesimpulan = PendaftaranMagang::leftJoin('hasil_wawancara', 'pendaftaran_magang.id_pendaftaran', '=', 'hasil_wawancara.id_pendaftaran')
         ->join('lowongan_magang', 'lowongan_magang.id_lowongan', 'pendaftaran_magang.id_lowongan')
-        ->where('pendaftaran_magang.id_pendaftaran', $id_pendaftaran)
+        ->where('pendaftaran_magang.id_pendaftaran', '9f8a4106-3def-4cd1-8bf6-9d8fc8f82c1c')
         ->select('hasil_wawancara.*', 'lowongan_magang.id_lowongan')
         ->first();
 

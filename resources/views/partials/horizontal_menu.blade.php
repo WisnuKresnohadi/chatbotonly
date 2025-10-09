@@ -263,8 +263,7 @@
                     </div>
                     @endif
                     <!-- Footer -->
-
-                    @if ((isset($footer) && $footer) ?? true)
+                    @if ($footer ?? true)
                         <footer class="content-footer footer bg-footer-theme" style="background-color:#1A3826 !important"
                         id="footer">
                         <div class="container-xxl">

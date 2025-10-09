@@ -119,6 +119,16 @@
                     <i class="ti ti-eye me-2"></i>
                     Lihat Kandidat
                 </a>
+               <a href=" {{ route('wawancara-flow.config', $data->id_lowongan) }} " class="btn btn-sm btn-outline-secondary"
+                style="border-color:#0d6efd; color:#0d6efd;">
+                    <i class="ti ti-edit me-2"></i>
+                    Config Softskill
+                </a>
+               <a href=" {{ route('wawancara-flow.result', $data->id_lowongan) }} " class="btn btn-sm btn-outline-secondary"
+                style="border-color:#0d6efd; color:#0d6efd;">
+                    <i class="ti ti-eye me-2"></i>
+                    Lihat Hasil Softskill
+                </a>
             </div>
         </div>
     </div>

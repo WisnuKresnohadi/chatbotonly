@@ -1,3 +1,4 @@
+
 @extends('partials.horizontal_menu')
 
 @section('page_style')
@@ -112,64 +113,11 @@
                             {!! $persuratan !!}
                         </div>
                     </div>
-                    <form action="{{ route('wawancara-flow.panduan', $pelamar->id_pendaftaran) }}" method="POST">
-                        @csrf
-                        <div class="persyaratan-tambahan-repeater col-lg-12 col-sm-6 form-group" data-limit="3">
-                            <div class="px-3 pt-2 pb-3">
-                                {{-- Softskill select --}}
-                                <div class="mb-3 col-12 form-group">
-                                    <label for="softskill" class="form-label">
-                                        Soft Skills yang akan digali lebih dalam (minimal 1 dan maksimal 3)<span style="color: red;">*</span>
-                                    </label>
-                                    <select class="form-select select2" name="softskill[]" id="softskill" data-placeholder="Pilih Soft Skills" data-tags="true" multiple>
-                                        <option value="Adaptasi">Adaptasi</option>
-                                        <option value="Komunikasi">Komunikasi</option>
-                                        <option value="Kepemimpinan">Kepemimpinan</option>
-                                        <option value="Kepercayaan Diri">Kepercayaan Diri</option>
-                                        <option value="Manajemen Waktu">Manajemen Waktu</option>
-                                        <option value="Pemecahan Masalah">Pemecahan Masalah</option>
-                                    </select>
-                                </div>
-
-                                {{-- Repeater --}}
-                                <div data-repeater-list="persyaratan_tambahan">
-                                    <div data-repeater-item>
-                                        <div class="gap-3 mb-3 justify-content-between d-flex">
-                                            <div class="w-100">
-                                                <h6>Pertanyaan Tambahan</h6>
-                                                <label class="form-label">Pertanyaan tambahan tidak akan diproses sebagai penilaian...</label>
-                                                <input type="text" name="persyaratan_tambah" class="form-control" placeholder="Tulis Pertanyaan">
-                                            </div>
-                                            <button type="button" class="mt-4 btn btn-outline-danger" data-repeater-delete>
-                                                <i class="ti ti-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4 border-top">
-                                    <button class="mt-4 btn btn-outline-warning" type="button" data-repeater-create>
-                                        <i class="ti ti-plus me-1"></i>
-                                        <span class="align-middle">Pertanyaan</span>
-                                    </button>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary mt-2">Mulai Test</button>
-                            </div>
-                        </div>
-                    </form>
-                    <div>
-                        <button class="btn btn-primary mt-2">
-                            <a href="{{ route('wawancara-flow.result', $pelamar->id_pendaftaran) }}" style="color: white; text-decoration: none;">
-                                Lihat Hasil Wawancara
-                            </a>
-                        </button>
-                    </div>
                     <div class="mt-3" style="display:flex; gap:20px;">
                         <div style="font-weight:600; display:flex; flex-direction:column;  " >
-                            {{-- @if($pelamar->current_step == "approved_by_lkm" && ($pelamar->kuota_wawancara ?? 1) > 0)
+                            @if($pelamar->current_step == "approved_by_lkm" && ($pelamar->kuota_wawancara ?? 1) > 0)
                                 <a name="" id="" class="btn btn-primary" href="/wawancara/panduan/{{ $pelamar->id_pendaftaran }}" role="button" style="font-size:13px; padding-y:10px; margin-bottom:24px;">Mulai Wawancara</a>
-                            @endif --}}
+                            @endif
                             <h5 style=" color: #4B465C;" >Batas Akhir Seleksi Wawancara</h5>
                             <div style="text-align: center; width:123px; border-radius:4px; padding:8px 4px; font-size:13px; color:#cc7f36; background-color:#ffecd9">
                                 13 Agustus 2025
@@ -214,106 +162,9 @@
     $(document).ready(function() {
         let id = "{{ $pelamar->id_bidang_pekerjaan_industri ?? 1 }}";
         let total_nilai = "{{ $pelamar->nilai_akademik ?? 0 }}";
-        initFormPersyaratanTambahanRepeater();
-        initSoftskillSelect();
         loadData(id, total_nilai);
     });
 
-        let formRepeater = $('.persyaratan-tambahan-repeater');
-
-        function initFormPersyaratanTambahanRepeater() {
-            var row = 2;
-            var col = 1;
-
-            if (formRepeater.length == 0) return;
-
-            formRepeater.repeater({
-                show: function() {
-                    let dataCallback = $(this).attr('data-callback');
-                    if (typeof window[dataCallback] === "function") window[dataCallback](this);
-
-                    var fromControl = $(this).find('.form-control, .form-select, .form-check-input');
-                    var formLabel = $(this).find('.form-label, .form-check-label');
-
-                    fromControl.each(function(i) {
-                        if (!$(this).hasClass('flatpickr-date')) {
-                            var id = 'form-repeater-' + row + '-' + col;
-                            $(fromControl[i]).attr('id', id);
-                            $(formLabel[i]).attr('for', id);
-                            col++;
-                        }
-                    });
-
-                    row++;
-
-                    var limitcount = $(this).parents(".persyaratan-tambahan-repeater").data("limit");
-                    var itemcount = $('[data-repeater-list="persyaratan_tambahan"] [data-repeater-item]').length
-
-                    if (limitcount) {
-                        if (itemcount <= limitcount) {
-                            $(this).slideDown();
-                        } else {
-                            $(this).remove();
-                        }
-                    } else {
-                        $(this).slideDown();
-                    }
-
-                    if (itemcount >= limitcount) {
-                        $(".persyaratan-tambahan-repeater [data-repeater-create]").parent().addClass("d-none");
-                    }
-                },
-                hide: function(e) {
-                    var limitcount = $(this).parents(".persyaratan-tambahan-repeater").data("limit");
-                    var itemcount = $('[data-repeater-list="persyaratan_tambahan"] [data-repeater-item]')
-                        .length;
-
-                    const element = $(this)
-                    sweetAlertConfirm({
-                        title: 'Apakah Anda yakin ingin menghapus pertanyaan ini?',
-                        text: "",
-                        icon: 'warning',
-                        confirmButtonText: 'Ya, saya yakin!',
-                        cancelButtonText: 'Batal'
-                    }, function() {
-                        let dataCallback = $(this).attr('data-callback');
-                        if (typeof window[dataCallback] === "function") window[dataCallback](this);
-                        element.slideUp(e);
-                        if (itemcount <= limitcount) {
-                            $(".persyaratan-tambahan-repeater [data-repeater-create]").parent()
-                                .removeClass('d-none');
-                        }
-                    })
-                },
-                isFirstItemUndeletable: true
-            });
-
-        }
-        function initSoftskillSelect() {
-        let $select = $('#softskill');
-
-        $select.select2({
-            maximumSelectionLength: 3,
-            placeholder: "Pilih Soft Skills"
-        });
-
-        // When selecting
-        $select.on('select2:select', function () {
-            let selected = $(this).val() || [];
-            if (selected.length >= 3) {
-                $select.find('option:not(:selected)').prop('disabled', true);
-            } else {
-                $select.find('option').prop('disabled', false);
-            }
-            $select.trigger('change.select2');
-        });
-
-        // When unselecting
-        $select.on('select2:unselect', function () {
-            $select.find('option').prop('disabled', false);
-            $select.trigger('change.select2');
-        });
-    }
     function loadData(id, total_nilai){
         $('#table-nilai-mk-mahasiswa').DataTable({
             processing: true,
@@ -361,7 +212,5 @@
             }
         });
     }
-
 </script>
-
 @endsection

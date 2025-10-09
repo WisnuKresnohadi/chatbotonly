@@ -9,8 +9,6 @@ use App\Http\Controllers\EmbeddingController;
 use App\Http\Controllers\PineconeController;
 use App\Http\Controllers\OpenAIController;
 use App\Models\Hasil_Wawancara;
-use App\Models\LowonganMagang;
-use App\Models\PendaftaranMagang;
 
 class ChatController extends Controller
 {
@@ -19,37 +17,6 @@ class ChatController extends Controller
 {
     if (!auth()->check() || auth()->user()->mahasiswa == null) {
         return redirect('/');
-    }
-
-    if ($request->isMethod('post')) {
-        $softskills = $request->input('softskill', []);
-        $persyaratanTambahan = collect($request->persyaratan_tambahan)
-            ->pluck('persyaratan_tambah')
-            ->filter()
-            ->values()
-            ->toArray();
-
-        $pendaftaranMagang = PendaftaranMagang::find($id_pendaftaran);
-        $idLowongan = $pendaftaranMagang->id_lowongan;
-        $lowongan = LowonganMagang::find($idLowongan);
-
-        // Build update data dynamically
-        $updateData = [];
-
-        if (!empty($softskills)) {
-            $updateData['softskill'] = $softskills;
-        }
-
-        if (!empty($persyaratanTambahan)) {
-            $updateData['requirements'] = $persyaratanTambahan;
-        }
-
-        // Update only if something changed
-        if (!empty($updateData)) {
-            $lowongan->update($updateData);
-        }
-
-        // dd($updateData);
     }
 
     return view('chatbot.index', compact('id_pendaftaran'));
@@ -65,7 +32,7 @@ class ChatController extends Controller
         // $inputSet = [];
         $inputSet = $this->getInputSet($id_pendaftaran);
 
-        $startResponse = app(WawancaraController::class)->start($id_pendaftaran);
+        $startResponse = app(WawancaraController::class)->start($id_pendaftaran, false);
 
         if ($startResponse instanceof \Illuminate\Http\RedirectResponse) {
             return $startResponse;
